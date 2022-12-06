@@ -2,11 +2,11 @@ const {User} = require('./User')
 const {Board} = require('./Board')
 const {Cheese} = require('./Cheese')
 
-// Musician.belongsTo(Band);
-// Band.hasMany(Musician);
+Board.belongsTo(User);
+User.hasMany(Board);
 
-// Song.belongsToMany(Band,{through:"song_band"});
-// Band.belongsToMany(Song,{through:"song_band"});
+Cheese.belongsToMany(Board,{through:"cheese_board"});
+Board.belongsToMany(Cheese,{through:"cheese_board"});
 
 module.exports = {
     User,
