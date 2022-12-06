@@ -51,8 +51,44 @@ describe('User/Cheese/Board models',()=>{
         await cheese1.addBoards([board1,board2]);
         const cheese1boards = await cheese1.getBoards();
         expect(cheese1boards.length).toBe(2);
+        await board1.addCheeses([cheese1,cheese2]);
+        const board1cheeses = await board1.getCheeses();
+        expect(board1cheeses.length).toBe(2)
     })
     //eager loading
-    test('')
+    test('eager loading works as designed', async()=>{
+        await sequelize.sync({ force:true });
+        const user1 = await User.create({name:'BoJack',email:'bojack@gmail.com'});
+        const cheese1 = await Cheese.create({title:'brie', description:'white,buttery,creamy'});
+        const cheese2 = await Cheese.create({title:'vegan cheddar', description:'yellow,firm'});
+        const board1 = await Board.create({type:'french',description:'delish',rating:5});
+        const board2 = await Board.create({type:'vegan', description:'odd', rating:3});
+        //board has cheeses
+        await board1.addCheeses([cheese1,cheese2]);
+        await board2.addCheese(cheese2)
+        const boardswithCheeses = await Board.findAll({
+            include:[{
+                model: Cheese
+            }]
+        })
+        expect(boardswithCheeses[0].cheeses.length).toBe(2);
+        expect(boardswithCheeses[1].cheeses.length).toBe(1);
+        //user can be loaded with its boards
+        await user1.addBoards([board1,board2]);
+        const usersWithBoards = await User.findAll({
+            include:{
+                model: Board
+            }
+        })
+        expect(usersWithBoards[0].boards.length).toBe(2)
+        //cheese can be loaded with its board data
+        await cheese2.addBoards([board1,board2]);
+        const cheesesWithBoardData = await Cheese.findAll({
+            include:[{
+                model:Board
+            }]
+        })
+        expect(cheesesWithBoardData[1].boards.length).toBe(2)
+    })
 
 })
